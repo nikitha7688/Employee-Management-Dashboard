@@ -17,25 +17,15 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log("✅ MongoDB connected"))
-.catch((err) => console.error("❌ DB Connection Error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("DB Connection Error:", err));
 
 // Routes
 
-// GET: Fetch all employees with optional filters
+// GET: Fetch all employees (no filters)
 app.get("/api/employees", async (req, res) => {
   try {
-    const query = {};
-    if (req.query.name) {
-      query.name = { $regex: req.query.name, $options: "i" };
-    }
-    if (req.query.department) {
-      query.department = req.query.department;
-    }
-    if (req.query.status) {
-      query.status = req.query.status;
-    }
-    const employees = await Employee.find(query);
+    const employees = await Employee.find(); // No filtering
     res.json(employees);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -54,13 +44,17 @@ app.post("/api/employees", async (req, res) => {
   }
 });
 
-// PUT: Update an employee
+// PUT: Update an employee (using full request body)
 app.put("/api/employees/:id", async (req, res) => {
   try {
-    const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updated = await Employee.findByIdAndUpdate(
+      req.params.id,
+      req.body, // Use full body for update
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     res.json(updated);
   } catch (err) {
     console.error("PUT Error:", err);
@@ -80,5 +74,5 @@ app.delete("/api/employees/:id", async (req, res) => {
 
 // Start server
 app.listen(process.env.PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
+  console.log(`Server running on http://localhost:${process.env.PORT}`);
 });
